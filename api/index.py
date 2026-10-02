@@ -15,12 +15,13 @@ CORS_HEADERS = {
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next):
-    cors = {
+        cors = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": request.headers.get(
             "access-control-request-headers", "Content-Type, Authorization, Accept"
         ),
+        "Access-Control-Expose-Headers": "Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Content-Type",
         "Access-Control-Max-Age": "86400",
     }
     if request.method == "OPTIONS":
