@@ -1,17 +1,29 @@
 import json
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request, Response
 from pydantic import BaseModel
 
 app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers": "*",
+}
+
+
+@app.middleware("http")
+async def add_cors(request: Request, call_next):
+    # Answer browser preflight (OPTIONS) requests directly
+    if request.method == "OPTIONS":
+        return Response(status_code=204, headers=CORS_HEADERS)
+    response = await call_next(request)
+    # Always add the CORS headers, even when no Origin header was sent
+    for k, v in CORS_HEADERS.items():
+        response.headers[k] = v
+    return response
+
 
 # Load the telemetry file that sits next to this script
 raw = json.loads((Path(__file__).parent / "q-vercel-latency.json").read_text())
