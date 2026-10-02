@@ -15,12 +15,21 @@ CORS_HEADERS = {
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next):
-    # Answer browser preflight (OPTIONS) requests directly
+    cors = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": request.headers.get(
+            "access-control-request-headers", "Content-Type, Authorization, Accept"
+        ),
+        "Access-Control-Max-Age": "86400",
+    }
     if request.method == "OPTIONS":
-        return Response(status_code=204, headers=CORS_HEADERS)
-    response = await call_next(request)
-    # Always add the CORS headers, even when no Origin header was sent
-    for k, v in CORS_HEADERS.items():
+        return Response(status_code=200, headers=cors)
+    try:
+        response = await call_next(request)
+    except Exception:
+        response = Response("Internal Server Error", status_code=500)
+    for k, v in cors.items():
         response.headers[k] = v
     return response
 
