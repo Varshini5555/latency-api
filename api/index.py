@@ -6,16 +6,10 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-CORS_HEADERS = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers": "*",
-}
-
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next):
-        cors = {
+    cors = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": request.headers.get(
